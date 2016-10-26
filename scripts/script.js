@@ -2,25 +2,41 @@ var switchViewContainerNode = document.querySelector(".switch-view-container"),
 	weatherDisplayContainerNode = document.querySelector(".weather-display-container"),
 	searchBarNode = document.querySelector(".search-bar")
 
-var weatherBaseUrl = "https://api.darksky.net/forecast/",
-	googleGeocodeBaseUrl = "https://maps.googleapis.com/maps/api/geocode/json?",
-	DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
-	lat = 29.7604267,
-	long = -95.3698028
-
-console.log("running app")
+var googleGeocodeBaseUrl = "https://maps.googleapis.com/maps/api/geocode/json?",
+	DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 
 //MODELS
 var WeatherModel = Backbone.Model.extend({
-	url: "https://api.darksky.net/forecast/" + API_KEY + "/" + lat + "," + long + "?callback=?"
+	url: function() {
+		return "https://api.darksky.net/forecast/77c5030acac85f6c0892fa06d14c08c7/" + 
+			this._lat + ',' + this._long
+	},
+	_lat: "",
+	_long: ""
 })
 
 var inputHandler = function(clickEvent) {
 	var buttonClicked = clickEvent.target,
 		//get value of clicked target, then make it lower case for future hash manipulation
-		buttonName = buttonClicked.value
+		buttonName = buttonClicked.value,
+		splitHash = location.hash.split("/")
+		
+		var newHash = replaceLastArrayEl(splitHash,buttonName)
+
 	//names hash from HTML of button clicked by user (HTML should be current, hourly, or daily)
-	location.hash = buttonName
+	location.hash = newHash.join("/")
+}
+
+var replaceLastArrayEl = function(array, elToReplace){
+	var newArr = []
+	for(var i = 0; i < array.length; i++){
+		if(i === array.length - 1){
+			newArr.push(elToReplace)
+		} else {
+			newArr.push(array[i])
+		}
+	}
+	return newArr;
 }
 
 var search = function(eventObj){
@@ -49,7 +65,15 @@ var getLatAndLong = function(geocodeData) {
 		latitude = geocodeLocationObject.lat,
 		longitude = geocodeLocationObject.lng
 
-	location.hash = "Search/" + latitude + "/" + longitude
+	location.hash = latitude + "/" + longitude + "/Current"
+}
+
+var getDefaultLatAndLong = function(currentLocation){
+	var coordinates = currentLocation.coords,
+		latitude = coordinates.latitude,
+		longitude = coordinates.longitude
+
+	location.hash = latitude + "/" + longitude + "/Current"
 }
 
 //VIEWS
@@ -116,56 +140,48 @@ var showGif = function() {
 //CONTROLLER
 var Controller = Backbone.Router.extend({
 	routes: {
-		"Current": "handleCurrent",
-		"Hourly": "handleHourly",
-		"Daily": "handleDaily",
-		"Search/:lat/:long": "handleSearch",
+		":lat/:long/Current": "handleCurrent",
+		":lat/:long/Hourly": "handleHourly",
+		":lat/:long/Daily": "handleDaily",
 		"*default": "handleDefault"
 	},
-	handleCurrent: function(){
-		console.log("Current")
-		var weatherModel = new WeatherModel(),
-			promise = weatherModel.fetch()
-		
+	handleCurrent: function(lat,long){
+		var weatherModel = new WeatherModel()
+
+		weatherModel._lat = lat
+		weatherModel._long = long
+		var promise = weatherModel.fetch()
 		showGif()		
 		promise.then(function(){
 			displayCurrentWeather(weatherModel)
 		})
 	},
-	handleHourly: function(){
+	handleHourly: function(lat,long){
 		console.log("Hour")
-		var weatherModel = new WeatherModel(),
-			promise = weatherModel.fetch()
-		
-		showGif()
+		var weatherModel = new WeatherModel()
+
+		weatherModel._lat = lat
+		weatherModel._long = long
+		var promise = weatherModel.fetch()
+		showGif()		
 		promise.then(function(){
 			displayHourlyWeather(weatherModel)
 		})
 	},
-	handleDaily: function(){
+	handleDaily: function(lat,long){
 		console.log("Daily")
-		var weatherModel = new WeatherModel(),
-			promise = weatherModel.fetch()
-		
-		showGif()
+		var weatherModel = new WeatherModel()
+
+		weatherModel._lat = lat
+		weatherModel._long = long
+		var promise = weatherModel.fetch()
+		showGif()		
 		promise.then(function(){
 			displayDailyWeather(weatherModel)
 		})
 	},
-	handleSearch: function(lati,longi){
-		console.log("searching for " + lati + " & " + longi)
-		var weatherModel = new WeatherModel()
-			weatherModel.set({url: "https://api.darksky.net/forecast/" + API_KEY + "/" + lati + "," + longi + "?callback=?"})
-			console.log(weatherModel)
-
-		var promise = weatherModel.fetch()
-		showGif()
-		promise.then(function(){
-			displayCurrentWeather(weatherModel)
-		})
-	},
 	handleDefault: function(){
-		location.hash = "Current"
+		navigator.geolocation.getCurrentPosition(getDefaultLatAndLong)
 	},
 	initialize: function(){
 		Backbone.history.start()
