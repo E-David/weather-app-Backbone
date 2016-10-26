@@ -8,7 +8,7 @@ var googleGeocodeBaseUrl = "https://maps.googleapis.com/maps/api/geocode/json?",
 //MODELS
 var WeatherModel = Backbone.Model.extend({
 	url: function() {
-		return "https://api.darksky.net/forecast/" + 
+		return "https://api.darksky.net/forecast/77c5030acac85f6c0892fa06d14c08c7/" + 
 			this._lat + ',' + this._long
 	},
 	_lat: "",
@@ -52,7 +52,7 @@ var search = function(eventObj){
 }
 
 var fetchLocation = function(searchTerms) {
-	var googleGeocodeUrl = googleGeocodeBaseUrl + "&address=" + searchTerms,
+	var googleGeocodeUrl = googleGeocodeBaseUrl + "key=" + "AIzaSyCSI-obwuXkquoR6IQG_uAd8j7g_je6I_I" + "&address=" + searchTerms,
 		promise = $.getJSON(googleGeocodeUrl)
 
 	return promise;
