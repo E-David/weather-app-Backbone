@@ -9,7 +9,7 @@ var googleGeocodeBaseUrl = "https://maps.googleapis.com/maps/api/geocode/json?",
 var WeatherModel = Backbone.Model.extend({
 	url: function() {
 		return "https://api.darksky.net/forecast/77c5030acac85f6c0892fa06d14c08c7/" + 
-			this._lat + ',' + this._long
+			this._lat + ',' + this._long + '?callback=?'
 	},
 	_lat: "",
 	_long: ""
