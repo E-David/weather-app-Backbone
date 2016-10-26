@@ -52,7 +52,7 @@ var search = function(eventObj){
 }
 
 var fetchLocation = function(searchTerms) {
-	var googleGeocodeUrl = googleGeocodeBaseUrl + "key=" + GOOGLE_API + "&address=" + searchTerms,
+	var googleGeocodeUrl = googleGeocodeBaseUrl + "key=" + "AIzaSyCSI-obwuXkquoR6IQG_uAd8j7g_je6I_I" + "&address=" + searchTerms,
 		promise = $.getJSON(googleGeocodeUrl)
 
 	return promise;
